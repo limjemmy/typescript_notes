@@ -1,10 +1,12 @@
 {
   "name": "lim_typescript",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "TypeScript/Node.js backend for notes application",
+  "main": "dist/server.js",
   "scripts": {
-    "start": "ts-node src/server.ts",
+    
+    "start": "node dist/server.js",        
+    "build": "tsc",                        
     "build-frontend": "cd src/frontend && npm install && npm run build",
     "start:dev": "concurrently \"ts-node src/server.ts\" \"cd src/frontend && npm start\"",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -18,7 +20,7 @@
     "concurrently": "^9.2.1",
     "cors": "^2.8.5",
     "express": "^5.1.0",
-    "mysql2": "^3.15.3"
+    "mysql2": "^3.15.3" 
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
