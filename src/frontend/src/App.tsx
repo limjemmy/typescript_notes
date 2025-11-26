@@ -137,7 +137,8 @@ function App() {
     if (!user)
         return (
             <div style={{ fontFamily: "Arial, sans-serif", maxWidth: 500, margin: "50px auto", textAlign: "center" }}>
-                <h1>Notes App</h1>
+                <h1>TAKE NOTE!</h1>
+                  <h3>Jemmy Lim II</h3>
 
                 <div style={{ marginBottom: 30 }}>
                     <h2>Register</h2>
@@ -156,7 +157,7 @@ function App() {
 
                 <div>
                     <h2>Or login with Google</h2>
-                    <a href={`${API}/auth/login`}> {/* Added missing /auth prefix */}
+                    <a href={`${API}/login`}> {/* Added missing /auth prefix */}
                         <button style={{ ...buttonStyle, backgroundColor: "#4285F4", color: "#fff" }}>Login with Google</button>
                     </a>
                 </div>
