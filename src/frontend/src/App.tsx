@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 // Use the URL of your Render Web Service (e.g., https://your-backend-name.onrender.com/api)
 // Assuming your backend routes start with /api, include that prefix.
 // ------------------------------------------------------------------------------------------------
-const API = process.env.REACT_APP_API_URL || "https://notes-api-server-itk9.onrender.com";
+const API = process.env.REACT_APP_API_URL || "https://notes-api-server-itk9.onrender.com/api";
 
 type User = {
     id?: number;      
