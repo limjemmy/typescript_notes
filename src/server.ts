@@ -1,25 +1,28 @@
-// ------------------- Imports -------------------
 const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2");
 const path = require("path");
 const axios = require("axios");
+const dotenv = require("dotenv");
+
+dotenv.config();
+
+
 import type { Request, Response } from "express";
 
-// ------------------- App setup -------------------
 const app = express();
-const PORT = 5001;
+const PORT = process.env.PORT || 5001;
 
 // ------------------- Config -------------------
-const DB_HOST = process.env.DB_HOST || "localhost";
-const DB_USER = process.env.DB_USER || "root";
-const DB_PASS = process.env.DB_PASS || "";
-const DB_NAME = process.env.DB_NAME || "notes_app";
+const DB_HOST = process.env.DB_HOST!;
+const DB_USER = process.env.DB_USER!;
+const DB_PASS = process.env.DB_PASS!;
+const DB_NAME = process.env.DB_NAME!;
 
-const CLIENT_ID = process.env.CLIENT_ID || "";
-const CLIENT_SECRET = process.env.CLIENT_SECRET || "";
-const REDIRECT_URI = process.env.REDIRECT_URI || "http://localhost:5001/oauth/callback";
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
+const CLIENT_ID = process.env.CLIENT_ID!;
+const CLIENT_SECRET = process.env.CLIENT_SECRET!;
+const REDIRECT_URI = process.env.REDIRECT_URI!;
+const FRONTEND_URL = process.env.FRONTEND_URL!;
 
 // ------------------- Middleware -------------------
 app.use(cors({ origin: FRONTEND_URL, credentials: true }));
@@ -39,6 +42,7 @@ db.connect((err: any) => {
 });
 
 // ------------------- Auth -------------------
+
 // Register
 app.post("/auth/register", (req: Request, res: Response) => {
   const { name, email, password } = req.body;
@@ -72,7 +76,7 @@ app.post("/auth/login", (req: Request, res: Response) => {
   });
 });
 
-// Google OAuth
+// ------------------- Google OAuth -------------------
 app.get("/login", (req: Request, res: Response) => {
   const url =
     `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}` +
@@ -104,13 +108,16 @@ app.get("/oauth/callback", async (req: Request, res: Response) => {
     });
     const g = userRes.data;
 
+    // Insert or update user
     db.query(
       "INSERT INTO users (google_id, name, email, picture) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=?, email=?, picture=?",
       [g.id, g.name, g.email, g.picture, g.name, g.email, g.picture],
-      () => {
-        const redirectUrl = `${FRONTEND_URL}/?google_id=${g.id}&name=${encodeURIComponent(g.name)}&email=${encodeURIComponent(
-          g.email
-        )}&picture=${encodeURIComponent(g.picture)}`;
+      (err: any) => {
+        if (err) return res.status(500).send("DB error");
+
+        const redirectUrl = `${FRONTEND_URL}/?google_id=${g.id}&name=${encodeURIComponent(
+          g.name
+        )}&email=${encodeURIComponent(g.email)}&picture=${encodeURIComponent(g.picture)}`;
         res.redirect(redirectUrl);
       }
     );
@@ -122,29 +129,28 @@ app.get("/oauth/callback", async (req: Request, res: Response) => {
 
 // ------------------- Notes CRUD -------------------
 
-// Get all notes for a user
+// Get notes
 app.get("/notes", (req: Request, res: Response) => {
   const { user_id, google_id } = req.query;
   if (!user_id && !google_id) return res.status(400).json({ error: "Missing user identifier" });
 
-  db.query(
-    "SELECT * FROM notes WHERE user_id=? OR google_id=?",
-    [user_id || null, google_id || null],
-    (err: any, result: any[]) => {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json(result);
-    }
-  );
+  const sql = "SELECT * FROM notes WHERE user_id=? OR google_id=?";
+  db.query(sql, [user_id || null, google_id || null], (err: any, result: any[]) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(result);
+  });
 });
 
 // Add note
 app.post("/notes", (req: Request, res: Response) => {
-  const { user_id, google_id, title, content } = req.body;
+  const { google_id, user_id, title, content } = req.body;
   if (!title || !content) return res.status(400).json({ error: "Title/content required" });
 
+  const uid = user_id && Number(user_id) > 0 ? user_id : null;
+
   db.query(
-    "INSERT INTO notes (user_id, google_id, title, content) VALUES (?, ?, ?, ?)",
-    [user_id || null, google_id || null, title, content],
+    "INSERT INTO notes (google_id, user_id, title, content) VALUES (?, ?, ?, ?)",
+    [google_id || null, uid, title, content],
     (err: any, result: any) => {
       if (err) return res.status(500).json({ error: err.message });
       res.json({ success: true, noteId: result.insertId });
@@ -158,7 +164,7 @@ app.put("/notes/:id", (req: Request, res: Response) => {
   const { title, content } = req.body;
   if (!title || !content) return res.status(400).json({ error: "Title/content required" });
 
-  db.query("UPDATE notes SET title=?, content=? WHERE id=?", [title, content, id], (err: any, result: any) => {
+  db.query("UPDATE notes SET title=?, content=? WHERE id=?", [title, content, id], (err: any) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json({ success: true });
   });
@@ -167,7 +173,7 @@ app.put("/notes/:id", (req: Request, res: Response) => {
 // Delete note
 app.delete("/notes/:id", (req: Request, res: Response) => {
   const { id } = req.params;
-  db.query("DELETE FROM notes WHERE id=?", [id], (err: any, result: any) => {
+  db.query("DELETE FROM notes WHERE id=?", [id], (err: any) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json({ success: true });
   });
@@ -176,7 +182,9 @@ app.delete("/notes/:id", (req: Request, res: Response) => {
 // ------------------- Serve React -------------------
 const buildPath = path.join(__dirname, "frontend", "build");
 app.use(express.static(buildPath));
-app.get("/:path", (req: Request, res: Response) => res.sendFile(path.join(buildPath, "index.html")));
+app.get("/:path", (req: Request, res: Response) => {
+  res.sendFile(path.join(buildPath, "index.html"));
+});
 
 // ------------------- Start server -------------------
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
