@@ -2,9 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2");
 const axios = require("axios");
-const dotenv = require("dotenv");
 
-dotenv.config();
 
 import type { Request, Response } from "express";
 
