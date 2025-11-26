@@ -16,8 +16,8 @@ const DB_USER = "root";
 const DB_PASS = "12345";
 const DB_NAME = "notes_app";
 
-const CLIENT_ID = "486979428931-oq9c14d620km3rohbafmnqem38u6quof.apps.googleusercontent.com";
-const CLIENT_SECRET = "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";
+const CLIENT_ID = "CLIENT ID";
+const CLIENT_SECRET = "CLIENT SECRET";
 const REDIRECT_URI = "http://localhost:5001/oauth/callback";
 const FRONTEND_URL = "http://localhost:3000";
 
