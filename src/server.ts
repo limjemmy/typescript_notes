@@ -11,15 +11,15 @@ const app = express();
 const PORT = 5001;
 
 // ------------------- Config -------------------
-const DB_HOST = "localhost";
-const DB_USER = "root";
-const DB_PASS = "12345";
-const DB_NAME = "notes_app";
+const DB_HOST = process.env.DB_HOST || "localhost";
+const DB_USER = process.env.DB_USER || "root";
+const DB_PASS = process.env.DB_PASS || "";
+const DB_NAME = process.env.DB_NAME || "notes_app";
 
-const CLIENT_ID = "CLIENT ID";
-const CLIENT_SECRET = "CLIENT SECRET";
-const REDIRECT_URI = "http://localhost:5001/oauth/callback";
-const FRONTEND_URL = "http://localhost:3000";
+const CLIENT_ID = process.env.CLIENT_ID || "";
+const CLIENT_SECRET = process.env.CLIENT_SECRET || "";
+const REDIRECT_URI = process.env.REDIRECT_URI || "http://localhost:5001/oauth/callback";
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
 // ------------------- Middleware -------------------
 app.use(cors({ origin: FRONTEND_URL, credentials: true }));
