@@ -7,6 +7,7 @@ const axios = require("axios");
 import type { Request, Response } from "express";
 
 const app = express();
+app.set('trust proxy', 1);
 // Listen on the port provided by the environment, or default to 8080 
 const PORT = process.env.PORT || 8080; 
 
