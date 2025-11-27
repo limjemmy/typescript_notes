@@ -155,12 +155,12 @@ function App() {
                     <button style={buttonStyle} onClick={handleLogin}>Login</button>
                 </div>
 
-                <div>
+                {/* <div>
                     <h2>Or login with Google</h2>
                     <a href={`${API}/login`}> {/* Added missing /auth prefix */}
-                        <button style={{ ...buttonStyle, backgroundColor: "#4285F4", color: "#fff" }}>Login with Google</button>
+                        {/* <button style={{ ...buttonStyle, backgroundColor: "#4285F4", color: "#fff" }}>Login with Google</button>
                     </a>
-                </div>
+                </div> */} 
             </div>
         );
 
